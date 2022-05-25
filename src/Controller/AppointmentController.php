@@ -19,6 +19,9 @@ class AppointmentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $appointment = $form->getData();
+//            $appointment->setUser($this->getUser());
+
             $entityManager->persist($form->getData());
             $entityManager->flush();
 
@@ -37,6 +40,12 @@ class AppointmentController extends AbstractController
     public function list(Request $request, EntityManagerInterface $entityManager): Response
     {
         $appointments = $entityManager->getRepository(Appointment::class)->findAll();
+
+        //TODO:: DO LIKE THAT!!!
+//        $user = $this->getUser();
+//        $appointments = $entityManager->getRepository(Appointment::class)->findByUser($this->getUser());
+
+
 
         return $this->render('appointment/list.html.twig', [
             'controller_name' => 'AppointmentController',

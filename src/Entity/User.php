@@ -1,38 +1,50 @@
 <?php
+
 namespace App\Entity;
 
-
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\PersistentCollection;
+use JetBrains\PhpStorm\Pure;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id;
 
-    /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     */
-    private $email;
+    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    private ?string $email;
 
-    /**
-     * @ORM\Column(type="json")
-     */
-    private $roles = [];
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     * @ORM\Column(type="string")
-     */
-    private $password;
+    #[ORM\Column(type: 'string')]
+    private string $password;
+
+    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Appointment::class)]
+    private $appointments;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $firstName;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $lastName;
+
+
+    #[Pure] public function __construct()
+    {
+        $this->appointments = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -52,19 +64,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * Публичное представление пользователя (например, имя пользователя, адрес почты и т.д.)
+     * A visual identifier that represents this user.
      *
      * @see UserInterface
      */
     public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
-
-    /**
-     * @deprecated since Symfony 5.3
-     */
-    public function getUsername(): string
     {
         return (string) $this->email;
     }
@@ -75,7 +79,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // гарантировать, что у каждого пользователя есть хотя бы ROLE_USER
+        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
@@ -104,22 +108,70 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * Возвращение соли только при необходимости, если вы не используете современный
-     * алгоритм хеширования (например, bcrypt или sodium) в вашем security.yaml.
-     *
-     * @see UserInterface
-     */
-    public function getSalt(): ?string
-    {
-        return null;
-    }
-
-    /**
      * @see UserInterface
      */
     public function eraseCredentials()
     {
-        // Если вы храните любые временные чувствительные данные пользователя, очистите их здесь
+        // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, Appointment>
+     */
+    public function getAppointments(): Collection
+    {
+        return $this->appointments;
+    }
+
+    public function addAppointment(Appointment $appointment): self
+    {
+        if (!$this->appointments->contains($appointment)) {
+            $this->appointments[] = $appointment;
+            $appointment->setCustomer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAppointment(Appointment $appointment): self
+    {
+        if ($this->appointments->removeElement($appointment)) {
+            // set the owning side to null (unless already changed)
+            if ($appointment->getCustomer() === $this) {
+                $appointment->setCustomer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    #[Pure] public function __toString(): string
+    {
+        return $this->getFirstName() . ' ' . $this->getLastName();
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(string $firstName): self
+    {
+        $this->firstName = $firstName;
+
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): self
+    {
+        $this->lastName = $lastName;
+
+        return $this;
     }
 }
