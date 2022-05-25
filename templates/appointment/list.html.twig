@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AppointmentController!{% endblock %}
+
+{% block body %}
+    <div class="d-flex">
+        {% for appointment in appointments %}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ appointment.name }}</h5>
+                    <h6 class="card-title">{{ appointment.mobile }}</h6>
+                    <p class="card-text">
+                        Дата: {{ appointment.time|date }}
+                        <hr/>
+                        Спорт: {{ appointment.sport }}
+                        <hr/>
+                        Записались к: {{ appointment.trainer }}
+                    </p>
+                </div>
+
+                <a href="{{ path('app_appointment_delete', { id: appointment.id }) }}" class="btn btn-danger">Удалить</a>
+                <a href="{{ path('app_appointment_edit', { id: appointment.id }) }}" class="btn btn-default">Изменить</a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
