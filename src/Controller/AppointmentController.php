@@ -20,7 +20,7 @@ class AppointmentController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $appointment = $form->getData();
-//            $appointment->setUser($this->getUser());
+            $appointment->setUser($this->getUser());
 
             $entityManager->persist($form->getData());
             $entityManager->flush();

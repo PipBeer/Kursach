@@ -30,6 +30,9 @@ class Appointment
     #[ORM\JoinColumn(nullable: false)]
     private $trainer;
 
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'appointments')]
+    private $user;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -91,6 +94,18 @@ class Appointment
     public function setTrainer(?Trainer $trainer): self
     {
         $this->trainer = $trainer;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

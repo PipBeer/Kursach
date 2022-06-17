@@ -31,14 +31,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string')]
     private string $password;
 
-    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Appointment::class)]
-    private $appointments;
-
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $firstName;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $lastName;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Appointment::class)]
+    private $appointments;
 
 
     #[Pure] public function __construct()
@@ -128,7 +128,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->appointments->contains($appointment)) {
             $this->appointments[] = $appointment;
-            $appointment->setCustomer($this);
+            $appointment->setUser($this);
         }
 
         return $this;
@@ -138,8 +138,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->appointments->removeElement($appointment)) {
             // set the owning side to null (unless already changed)
-            if ($appointment->getCustomer() === $this) {
-                $appointment->setCustomer(null);
+            if ($appointment->getUser() === $this) {
+                $appointment->setUser(null);
             }
         }
 
