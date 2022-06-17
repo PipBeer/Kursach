@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Welcome!{% endblock %}</title>
@@ -48,7 +48,7 @@
 
 {% for type, flash in app.flashes %}
     {% for message in flash %}
-        <div class="alert alert-{{ type }}">
+        <div class="alert alert-{{ }}">
             {{ message }}
         </div>
     {% endfor %}
